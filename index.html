@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#15291f">
+  <title>Forma — Visual Reasoning Test</title>
+  <style>
+    /* Shared design tokens make the appearance easy to customize. */
+    :root {
+      --background: #f4f5ef;
+      --surface: #ffffff;
+      --ink: #182b22;
+      --muted: #647168;
+      --accent: #245b43;
+      --accent-light: #eaf3e9;
+      --lime: #d7ef9b;
+      --border: #dce2d8;
+      --danger: #ad3e35;
+      --radius: 22px;
+      --shadow: 0 16px 50px rgb(24 43 34 / 5%);
+    }
+
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+        BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+
+    button { font: inherit; }
+    button, input { -webkit-tap-highlight-color: transparent; }
+    button { cursor: pointer; }
+    button:disabled { opacity: .4; cursor: not-allowed; }
+
+    :focus-visible {
+      outline: 3px solid #729b32;
+      outline-offset: 5px;
+    }
+
+    .shell { max-width: 1040px; margin: auto; padding: 0 24px 50px; }
+    .topbar {
+      min-height: 92px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 40px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .brand-icon {
+      display: grid;
+      grid-template-columns: repeat(2, 8px);
+      gap: 3px;
+      transform: rotate(-12deg);
+    }
+
+    .brand-icon i { width: 8px; height: 8px; background: var(--accent); }
+    .brand-icon i:last-child { border-radius: 50%; background: #98b76c; }
+
+    .top-note, .muted { color: var(--muted); }
+    .top-note { font-size: 13px; }
+    .eyebrow {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      font-size: clamp(38px, 6vw, 64px);
+      line-height: 1.08;
+      letter-spacing: -2.5px;
+      margin-bottom: 22px;
+    }
+    h2 { font-size: clamp(24px, 4vw, 32px); line-height: 1.25; }
+    h3 { font-size: 17px; }
+    .lead { color: var(--muted); font-size: 17px; max-width: 490px; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .welcome-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      align-items: center;
+      gap: 45px;
+      padding: 22px 0;
+    }
+
+    .hero-art {
+      padding: 30px;
+      background: #e8eddf;
+      border-radius: 34px;
+      transform: rotate(3deg);
+    }
+    .hero-art svg { display: block; width: 100%; }
+    .hero-caption {
+      text-align: center;
+      margin: 14px 0 0;
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .facts { display: flex; flex-wrap: wrap; gap: 22px; margin: 26px 0; }
+    .facts strong { display: block; font-size: 19px; }
+    .facts span { font-size: 12px; color: var(--muted); }
+
+    .button {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: white;
+      color: var(--ink);
+      padding: 12px 22px;
+      font-weight: 700;
+      transition: background .15s, transform .15s;
+    }
+    .button:hover:not(:disabled) { background: var(--accent-light); }
+    .button:active:not(:disabled) { transform: translateY(1px); }
+    .button.primary { color: white; background: var(--accent); border-color: var(--accent); }
+    .button.primary:hover:not(:disabled) { background: #194332; }
+    .button.large { padding: 15px 28px; }
+    .notice { font-size: 12px; color: var(--muted); margin: 20px 0 0; }
+    .instructions { margin: 34px 0 0; padding: 22px 26px; }
+    .instructions ol { padding-left: 22px; margin-bottom: 0; }
+    .instructions li { padding: 3px 0; color: var(--muted); }
+
+    .test-header, .question-heading, .navigation {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .test-header { margin-bottom: 16px; }
+    .test-header p { margin: 0; }
+    .timer {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 9px 16px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .timer.urgent { color: var(--danger); border-color: var(--danger); }
+    .progress-track {
+      height: 7px;
+      background: #e0e6db;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      background: var(--accent);
+      transition: width .2s;
+    }
+    .question-card { padding: 28px; }
+    .question-heading { margin-bottom: 12px; }
+    .tag {
+      background: var(--accent-light);
+      color: var(--accent);
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 7px;
+    }
+    .question-card h2 { margin-bottom: 8px; }
+    .puzzle {
+      display: grid;
+      place-items: center;
+      background: #f7f8f3;
+      border: 1px solid #e7eadf;
+      border-radius: 16px;
+      padding: 18px;
+      margin: 24px 0;
+      min-height: 250px;
+    }
+    .puzzle svg { display: block; width: 100%; max-height: 320px; }
+    .options {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      min-width: 0;
+    }
+    .options legend { margin-bottom: 12px; font-size: 13px; color: var(--muted); }
+    .option {
+      position: relative;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      min-height: 125px;
+      background: white;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .option:hover { border-color: #88a88b; }
+    .option.selected { border-color: var(--accent); background: var(--accent-light); }
+    .option:focus-within { outline: 3px solid #729b32; outline-offset: 3px; }
+    .option input {
+      position: absolute;
+      opacity: 0;
+      width: 1px;
+      height: 1px;
+    }
+    .option-letter {
+      position: absolute;
+      top: 8px;
+      left: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--muted);
+    }
+    .selected .option-letter { color: var(--accent); }
+    .option svg { width: 76px; height: 76px; margin-top: 10px; }
+    .navigation { margin-top: 24px; flex-wrap: wrap; }
+    .nav-right { display: flex; gap: 10px; }
+    .question-jumps { display: flex; gap: 9px; margin-top: 24px; justify-content: center; }
+    .jump {
+      width: 35px;
+      height: 35px;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 9px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .jump.answered { background: var(--accent-light); color: var(--accent); }
+    .jump.current { border: 2px solid var(--accent); color: var(--accent); }
+    .test-hint { text-align: center; font-size: 12px; color: var(--muted); margin-top: 12px; }
+
+    .results-heading { text-align: center; margin-bottom: 25px; }
+    .score-card { background: var(--ink); color: white; padding: 30px; text-align: center; }
+    .score { font-size: 78px; font-weight: 800; line-height: 1.2; letter-spacing: -4px; color: var(--lime); }
+    .score-card p { margin-bottom: 0; color: #d0dccf; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 18px 0 28px; }
+    .stat { padding: 18px; text-align: center; }
+    .stat strong { display: block; font-size: 22px; }
+    .stat span { font-size: 12px; color: var(--muted); }
+    .breakdown { padding: 25px; margin-bottom: 24px; }
+    .category { margin-top: 18px; }
+    .category-label { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; margin-bottom: 7px; }
+    .category-track { height: 8px; background: #e9ede3; border-radius: 6px; overflow: hidden; }
+    .category-track span { display: block; height: 100%; background: var(--accent); }
+    .review { margin: 15px 0; padding: 18px 22px; }
+    .review summary { cursor: pointer; font-weight: 700; }
+    .review p { margin: 12px 0 0; font-size: 14px; color: var(--muted); }
+    .center { text-align: center; }
+    footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 40px; }
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+    }
+    @media (max-width: 650px) {
+      .shell { padding: 0 16px 30px; }
+      .topbar { min-height: 75px; margin-bottom: 26px; }
+      .top-note { font-size: 11px; }
+      .welcome-grid { grid-template-columns: 1fr; gap: 30px; padding-top: 8px; }
+      .hero-art { max-width: 300px; margin: auto; padding: 22px; }
+      .question-card { padding: 18px; }
+      .options { grid-template-columns: repeat(2, 1fr); }
+      .option { min-height: 108px; }
+      .puzzle { padding: 8px; min-height: 190px; }
+      .question-heading { align-items: flex-start; }
+      .navigation > .button { flex: 1; }
+      .nav-right { flex: 2; }
+      .nav-right .button { flex: 1; padding: 12px; }
+      .stats { gap: 8px; }
+      .stat { padding: 14px 6px; }
+      .stat strong { font-size: 19px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        forma<span style="color:#91a477">.</span>
+      </div>
+      <span class="top-note">A little perspective goes a long way.</span>
+    </header>
+
+    <main>
+      <section id="welcome" aria-labelledby="welcome-title">
+        <div class="welcome-grid">
+          <div>
+            <p class="eyebrow">Discover the pattern</p>
+            <h1 id="welcome-title">A fresh angle<br>on your thinking.</h1>
+            <p class="lead">Explore your visual reasoning through four carefully
+              constructed puzzles. Spot relationships, follow transformations,
+              and find the missing piece.</p>
+            <div class="facts">
+              <div><strong>4 puzzles</strong><span>Three reasoning categories</span></div>
+              <div><strong>15 minutes</strong><span>Most finish in 3–5 minutes</span></div>
+            </div>
+            <button id="start" class="button primary large" type="button">Start Test →</button>
+            <p class="notice">Practice experience only. The illustrative IQ estimate
+              is not a standardized or clinically valid IQ measurement.</p>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <svg viewBox="0 0 300 300">
+              <rect width="300" height="300" rx="20" fill="#f9faf4"/>
+              <circle cx="75" cy="75" r="29" fill="#245b43"/>
+              <rect x="125" y="46" width="58" height="58" rx="3" fill="#c2da8f"/>
+              <path d="M225 44 L257 103 H193 Z" fill="#245b43"/>
+              <rect x="46" y="125" width="58" height="58" rx="3" fill="#c2da8f"/>
+              <path d="M154 123 L186 182 H122 Z" fill="#245b43"/>
+              <circle cx="225" cy="154" r="29" fill="none" stroke="#245b43" stroke-width="5"/>
+              <path d="M75 202 L107 261 H43 Z" fill="#245b43"/>
+              <circle cx="154" cy="232" r="29" fill="none" stroke="#245b43" stroke-width="5"/>
+              <rect x="195" y="202" width="60" height="60" rx="10"
+                fill="#e8eddf" stroke="#9fb18a" stroke-dasharray="5 5"/>
+              <text x="225" y="246" text-anchor="middle" font-size="37" fill="#245b43">?</text>
+            </svg>
+            <p class="hero-caption">See. Connect. Solve.</p>
+          </div>
+        </div>
+        <aside class="instructions card">
+          <h3>Before you begin</h3>
+          <ol>
+            <li>Choose one answer for each visual puzzle.</li>
+            <li>Move freely between questions; your selections are saved during this attempt.</li>
+            <li>Submit whenever you are ready. The test submits automatically at 00:00.</li>
+          </ol>
+        </aside>
+      </section>
+
+      <section id="test" aria-labelledby="question-title" hidden>
+        <div class="test-header">
+          <div>
+            <p class="eyebrow">Visual reasoning</p>
+            <p id="position"></p>
+          </div>
+          <!-- Updating every second is deliberately not an aria-live region. -->
+          <div id="timer" class="timer" role="timer" aria-label="Time remaining">15:00</div>
+        </div>
+        <div id="progress" class="progress-track" role="progressbar"
+          aria-label="Questions answered" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0">
+          <div id="progress-fill" class="progress-fill"></div>
+        </div>
+
+        <article class="question-card card">
+          <div class="question-heading">
+            <span id="category" class="tag"></span>
+            <span id="answered-count" class="muted"></span>
+          </div>
+          <h2 id="question-title" tabindex="-1"></h2>
+          <p id="question-description" class="muted"></p>
+          <div id="puzzle" class="puzzle"></div>
+          <fieldset id="options" class="options"></fieldset>
+          <nav class="navigation" aria-label="Test navigation">
+            <button id="previous" class="button" type="button">← Previous</button>
+            <div class="nav-right">
+              <button id="next" class="button" type="button">Next →</button>
+              <button id="submit" class="button primary" type="button">Submit Test</button>
+            </div>
+          </nav>
+        </article>
+        <nav id="jumps" class="question-jumps" aria-label="Jump to question"></nav>
+        <p class="test-hint">You can skip a question and return to it before submitting.</p>
+      </section>
+
+      <section id="results" aria-labelledby="results-title" hidden>
+        <div class="results-heading">
+          <p class="eyebrow">Your perspective, explored</p>
+          <h1 id="results-title" tabindex="-1">The pieces come together.</h1>
+          <p id="completion-message" class="muted"></p>
+        </div>
+        <div class="score-card card">
+          <span>Illustrative IQ estimate</span>
+          <div id="score" class="score"></div>
+          <p>A practice score, not a measurement of intelligence.</p>
+        </div>
+        <div class="stats">
+          <div class="stat card"><strong id="correct-stat"></strong><span>Correct answers</span></div>
+          <div class="stat card"><strong id="time-stat"></strong><span>Time spent</span></div>
+          <div class="stat card"><strong id="accuracy-stat"></strong><span>Accuracy</span></div>
+        </div>
+        <div class="breakdown card">
+          <h3>Performance by category</h3>
+          <div id="categories"></div>
+          <p class="notice">Each category has only one or two questions, so these
+            results describe this attempt rather than your overall ability.</p>
+        </div>
+        <h2>Look behind the patterns</h2>
+        <div id="review"></div>
+        <p class="notice">Scoring formula: 70 + 15 × correct answers + a speed bonus
+          of up to 5 points, scaled by accuracy. This formula is invented for this
+          demo and has no population norms. Retakes use the same questions.</p>
+        <div class="center" style="margin-top:26px">
+          <button id="retake" class="button primary large" type="button">Retake Test ↻</button>
+        </div>
+      </section>
+    </main>
+    <footer>FORMA · Visual reasoning practice · Built for curious minds</footer>
+    <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
+  </div>
+
+  <script>
+    "use strict";
+
+    // SVG helpers keep question data readable. All assets are generated locally.
+    // Labels describe each graphic for assistive technology.
+    const GREEN = "#245b43";
+    const LIGHT = "#b8d583";
+    const letters = ["A", "B", "C", "D"];
+
+    function svg(content, label, viewBox = "0 0 100 100") {
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}"
+        role="img" aria-label="${label}">${content}</svg>`;
+    }
+
+    function circle(x, y, filled = true, r = 13) {
+      return `<circle cx="${x}" cy="${y}" r="${r}" fill="${filled ? GREEN : "none"}"
+        stroke="${GREEN}" stroke-width="3"/>`;
+    }
+
+    function triangle(angle, filled = true) {
+      return `<path d="M50 20 L76 72 H24 Z" transform="rotate(${angle} 50 50)"
+        fill="${filled ? GREEN : "none"}" stroke="${GREEN}"
+        stroke-width="3" stroke-linejoin="round"/>`;
+    }
+
+    function dots(count) {
+      const positions = {
+        1: [[50, 50]],
+        2: [[32, 50], [68, 50]],
+        3: [[24, 50], [50, 50], [76, 50]]
+      };
+      return positions[count].map(([x, y]) => circle(x, y, true, 9)).join("");
+    }
+
+    function missing(x, y, size = 88) {
+      return `<rect x="${x}" y="${y}" width="${size}" height="${size}"
+        rx="12" fill="#eaf3e9" stroke="#a3b692" stroke-dasharray="5 5"/>
+        <text x="${x + size / 2}" y="${y + size / 2 + 12}"
+        text-anchor="middle" font-size="36" fill="${GREEN}">?</text>`;
+    }
+
+    // Matrix: every row shifts the counts 1, 2, 3 one place left.
+    function matrixPuzzle() {
+      const rows = [[1, 2, 3], [2, 3, 1], [3, 1, null]];
+      let content = "";
+      rows.forEach((row, r) => row.forEach((count, c) => {
+        const x = 10 + c * 100, y = 10 + r * 100;
+        content += count === null ? missing(x, y) :
+          `<rect x="${x}" y="${y}" width="88" height="88" rx="12"
+            fill="white" stroke="#dce2d8"/>
+           <g transform="translate(${x},${y}) scale(.88)">${dots(count)}</g>`;
+      }));
+      return svg(content,
+        "Three by three dot matrix. Row one: one, two, three dots. Row two: two, three, one. Row three: three, one, missing.",
+        "0 0 310 310");
+    }
+
+    function sequencePuzzle() {
+      let content = "";
+      [0, 90, 180, 270].forEach((angle, i) => {
+        content += `<g transform="translate(${i * 105},0)">
+          <rect x="5" y="5" width="90" height="90" rx="12" fill="white" stroke="#dce2d8"/>
+          ${triangle(angle)}</g>`;
+      });
+      content += missing(425, 5, 90);
+      return svg(content, "Sequence of triangles pointing up, right, down, left, then a missing figure.", "0 0 525 105");
+    }
+
+    // Visual addition: combine the independent marks in the first two figures.
+    function marks(vertical, horizontal) {
+      return `<rect x="21" y="21" width="58" height="58" rx="3"
+        fill="none" stroke="${GREEN}" stroke-width="3"/>
+        ${vertical ? `<path d="M50 21V79" stroke="${GREEN}" stroke-width="4"/>` : ""}
+        ${horizontal ? `<path d="M21 50H79" stroke="${GREEN}" stroke-width="4"/>` : ""}`;
+    }
+
+    function matchingPuzzle() {
+      return svg(`
+        <g transform="translate(5,5)">${marks(true, false)}</g>
+        <text x="120" y="65" text-anchor="middle" font-size="30" fill="#647168">+</text>
+        <g transform="translate(135,5)">${marks(false, true)}</g>
+        <text x="250" y="65" text-anchor="middle" font-size="30" fill="#647168">=</text>
+        ${missing(275, 11, 88)}
+      `, "A square with a vertical line plus a square with a horizontal line equals the missing combined figure.", "0 0 380 110");
+    }
+
+    function diamond(filled, count) {
+      return `<path d="M50 13L87 50L50 87L13 50Z" fill="${filled ? LIGHT : "none"}"
+        stroke="${GREEN}" stroke-width="3"/>` +
+        (count === 1 ? circle(50, 50, true, 6) :
+        circle(39, 50, true, 6) + circle(61, 50, true, 6));
+    }
+
+    function spatialPuzzle() {
+      return svg(`
+        <g transform="translate(10,10)">${diamond(false, 1)}</g>
+        <g transform="translate(130,10)">${diamond(true, 1)}</g>
+        <g transform="translate(10,130)">${diamond(false, 2)}</g>
+        ${missing(136, 136, 88)}
+      `, "Two by two set. Top left: outline diamond with one dot. Top right: filled diamond with one dot. Bottom left: outline diamond with two dots. Bottom right: missing.", "0 0 240 240");
+    }
+
+    // To add questions, follow this structure and update no rendering code.
+    // Correct answers are zero-based option indices.
+    const questions = [
+      {
+        category: "Matrix Reasoning",
+        title: "Find the missing piece.",
+        description: "Look for the relationship between the rows and columns.",
+        graphic: matrixPuzzle(),
+        options: [
+          { graphic: dots(1), label: "One dot" },
+          { graphic: dots(3), label: "Three dots" },
+          { graphic: dots(2), label: "Two dots" },
+          { graphic: circle(50, 50, false, 20), label: "One outlined circle" }
+        ],
+        correct: 2,
+        explanation: "Each row and each column contains one, two, and three dots exactly once. The last row has three and one, so the missing cell needs two dots."
+      },
+      {
+        category: "Sequence Continuation",
+        title: "Which shape comes next?",
+        description: "Follow the transformation from one figure to the next.",
+        graphic: sequencePuzzle(),
+        options: [
+          { graphic: triangle(90), label: "Triangle pointing right" },
+          { graphic: triangle(0), label: "Triangle pointing up" },
+          { graphic: triangle(180), label: "Triangle pointing down" },
+          { graphic: triangle(0, false), label: "Outlined triangle pointing up" }
+        ],
+        correct: 1,
+        explanation: "The filled triangle rotates 90 degrees clockwise each step: up, right, down, left, then up again. Its fill stays the same."
+      },
+      {
+        category: "Spatial Logic",
+        title: "Bring the figures together.",
+        description: "Combine both figures, keeping every line.",
+        graphic: matchingPuzzle(),
+        options: [
+          { graphic: marks(true, false), label: "Square with a vertical line" },
+          { graphic: marks(false, true), label: "Square with a horizontal line" },
+          { graphic: `<path d="M25 25L75 75M75 25L25 75" stroke="${GREEN}" stroke-width="4"/>`, label: "Diagonal cross without a square" },
+          { graphic: marks(true, true), label: "Square with vertical and horizontal lines" }
+        ],
+        correct: 3,
+        explanation: "Superimpose the two figures. The square border stays, and both the vertical and horizontal lines remain, producing a square divided into four parts."
+      },
+      {
+        category: "Matrix Reasoning",
+        title: "Complete the visual set.",
+        description: "Separate what changes across a row from what changes down a column.",
+        graphic: spatialPuzzle(),
+        options: [
+          { graphic: diamond(true, 2), label: "Filled diamond containing two dots" },
+          { graphic: diamond(false, 2), label: "Outlined diamond containing two dots" },
+          { graphic: diamond(true, 1), label: "Filled diamond containing one dot" },
+          { graphic: diamond(false, 1), label: "Outlined diamond containing one dot" }
+        ],
+        correct: 0,
+        explanation: "Moving right changes an outlined diamond to a filled diamond. Moving down changes one dot to two dots. The missing figure is therefore a filled diamond with two dots."
+      }
+    ];
+
+    const $ = id => document.getElementById(id);
+    const DURATION = 15 * 60;
+    let intervalId = null;
+
+    // One state object is the source of truth; the DOM only displays it.
+    // Null means unanswered; option 0 is valid and must not be treated as false.
+    function initialState() {
+      return {
+        screen: "welcome",
+        current: 0,
+        answers: Array(questions.length).fill(null),
+        startedAt: null,
+        deadline: null,
+        finishedAt: null
+      };
+    }
+    let state = initialState();
+
+    function showScreen(name) {
+      state.screen = name;
+      ["welcome", "test", "results"].forEach(id => {
+        $(id).hidden = id !== name;
+      });
+    }
+
+    function announce(message) {
+      $("announcement").textContent = message;
+    }
+
+    function formatTime(seconds) {
+      seconds = Math.max(0, Math.floor(seconds));
+      return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+    }
+
+    function startTest() {
+      clearInterval(intervalId);
+      state = initialState();
+      state.startedAt = Date.now();
+      state.deadline = state.startedAt + DURATION * 1000;
+      showScreen("test");
+      renderQuestion();
+      updateTimer();
+      intervalId = setInterval(updateTimer, 250);
+      announce("Test started. You have fifteen minutes.");
+    }
+
+    // Calculate remaining time from a deadline, rather than subtracting one
+    // each interval. Background tabs may throttle interval callbacks.
+    function updateTimer() {
+      if (state.screen !== "test") return;
+      const seconds = Math.max(0, Math.ceil((state.deadline - Date.now()) / 1000));
+      $("timer").textContent = formatTime(seconds);
+      $("timer").classList.toggle("urgent", seconds <= 60);
+
+      if (seconds === 0) finishTest(true);
+    }
+
+    // Every interaction also checks the deadline, preventing late selections
+    // if an interval was delayed while the tab was inactive.
+    function canInteract() {
+      if (state.screen !== "test") return false;
+      if (Date.now() >= state.deadline) {
+        finishTest(true);
+        return false;
+      }
+      return true;
+    }
+
+    function renderQuestion() {
+      const q = questions[state.current];
+      $("position").textContent = `Question ${state.current + 1} of ${questions.length}`;
+      $("category").textContent = q.category;
+      $("question-title").textContent = q.title;
+      $("question-description").textContent = q.description;
+      $("puzzle").innerHTML = q.graphic;
+
+      // Only trusted, developer-defined data is inserted with innerHTML.
+      $("options").innerHTML = `<legend>Choose one answer</legend>` +
+        q.options.map((option, index) => `
+          <label class="option ${state.answers[state.current] === index ? "selected" : ""}">
+            <input type="radio" name="answer" value="${index}"
+              aria-label="${letters[index]}: ${option.label}"
+              ${state.answers[state.current] === index ? "checked" : ""}>
+            <span class="option-letter" aria-hidden="true">${letters[index]}</span>
+            <span aria-hidden="true">${svg(option.graphic, option.label)}</span>
+          </label>
+        `).join("");
+
+      $("previous").disabled = state.current === 0;
+      $("next").disabled = state.current === questions.length - 1;
+      renderProgress();
+      $("question-title").focus();
+    }
+
+    function renderProgress() {
+      const answered = state.answers.filter(answer => answer !== null).length;
+      $("answered-count").textContent = `${answered}/${questions.length} answered`;
+      $("progress-fill").style.width = `${answered / questions.length * 100}%`;
+      $("progress").setAttribute("aria-valuenow", answered);
+      $("progress").setAttribute("aria-valuemax", questions.length);
+      $("progress").setAttribute("aria-valuetext", `${answered} of ${questions.length} questions answered`);
+      $("jumps").innerHTML = questions.map((_, index) => `
+        <button type="button" class="jump
+          ${state.answers[index] !== null ? "answered" : ""}
+          ${state.current === index ? "current" : ""}"
+          data-index="${index}"
+          ${state.current === index ? 'aria-current="step"' : ""}
+          aria-label="Question ${index + 1}, ${state.answers[index] !== null ? "answered" : "unanswered"}">
+          ${index + 1}
+        </button>
+      `).join("");
+    }
+
+    // Event delegation survives dynamic rendering and avoids duplicate listeners.
+    $("options").addEventListener("change", event => {
+      if (!event.target.matches('input[name="answer"]') || !canInteract()) return;
+      state.answers[state.current] = Number(event.target.value);
+      $("options").querySelectorAll(".option").forEach(label => {
+        label.classList.toggle("selected", label.querySelector("input").checked);
+      });
+      renderProgress();
+    });
+
+    function navigate(index) {
+      if (!canInteract() || index < 0 || index >= questions.length) return;
+      state.current = index;
+      renderQuestion();
+    }
+
+    $("previous").addEventListener("click", () => navigate(state.current - 1));
+    $("next").addEventListener("click", () => navigate(state.current + 1));
+    $("jumps").addEventListener("click", event => {
+      const button = event.target.closest("button[data-index]");
+      if (button) navigate(Number(button.dataset.index));
+    });
+
+    function finishTest(expired = false) {
+      // This guard makes submission idempotent: timer and clicks cannot submit twice.
+      if (state.screen !== "test") return;
+      expired = expired || Date.now() >= state.deadline;
+      state.finishedAt = Math.min(Date.now(), state.deadline);
+      clearInterval(intervalId);
+      intervalId = null;
+      showScreen("results");
+      renderResults(expired);
+      $("results-title").focus();
+      announce(expired ? "Time expired. Your test was submitted." : "Test submitted. Your results are ready.");
+    }
+
+    function renderResults(expired) {
+      const correct = questions.reduce((sum, q, i) =>
+        sum + Number(state.answers[i] === q.correct), 0);
+      const elapsed = Math.min(DURATION, Math.max(0,
+        (state.finishedAt - state.startedAt) / 1000));
+      const accuracy = correct / questions.length;
+
+      // Demo-only scoring. The speed bonus is accuracy-weighted, so rushing
+      // through all answers incorrectly never earns a speed bonus.
+      const speedBonus = 5 * (1 - elapsed / DURATION) * accuracy;
+      const estimate = Math.round(70 + 15 * correct + speedBonus);
+
+      $("score").textContent = estimate;
+      $("correct-stat").textContent = `${correct} / ${questions.length}`;
+      $("time-stat").textContent = formatTime(Math.ceil(elapsed));
+      $("accuracy-stat").textContent = `${Math.round(accuracy * 100)}%`;
+      const unanswered = state.answers.filter(answer => answer === null).length;
+      $("completion-message").textContent =
+        `${expired ? "Time is up — your answers were submitted automatically." : "You have completed this attempt."}` +
+        (unanswered ? ` ${unanswered} unanswered question${unanswered === 1 ? "" : "s"} counted as incorrect.` : "");
+
+      const categories = {};
+      questions.forEach((q, index) => {
+        if (!categories[q.category]) categories[q.category] = { correct: 0, total: 0 };
+        categories[q.category].total++;
+        categories[q.category].correct += Number(state.answers[index] === q.correct);
+      });
+
+      $("categories").innerHTML = Object.entries(categories).map(([name, data]) => {
+        const percent = Math.round(data.correct / data.total * 100);
+        return `<div class="category">
+          <div class="category-label">
+            <span>${name}</span><strong>${data.correct}/${data.total} · ${percent}%</strong>
+          </div>
+          <div class="category-track" aria-hidden="true">
+            <span style="width:${percent}%"></span>
+          </div>
+        </div>`;
+      }).join("");
+
+      $("review").innerHTML = questions.map((q, index) => {
+        const selected = state.answers[index];
+        const isCorrect = selected === q.correct;
+        const answerText = selected === null ? "Unanswered" : `${letters[selected]} — ${q.options[selected].label}`;
+        return `<details class="review card">
+          <summary>${index + 1}. ${q.title} · ${isCorrect ? "Correct" : "Incorrect"}</summary>
+          <p><strong>Your answer:</strong> ${answerText}<br>
+          <strong>Correct answer:</strong> ${letters[q.correct]} — ${q.options[q.correct].label}</p>
+          <p>${q.explanation}</p>
+        </details>`;
+      }).join("");
+    }
+
+    $("start").addEventListener("click", startTest);
+    $("submit").addEventListener("click", () => {
+      if (!canInteract()) return;
+      const unanswered = state.answers.filter(answer => answer === null).length;
+      if (unanswered && !window.confirm(
+        `You have ${unanswered} unanswered question${unanswered === 1 ? "" : "s"}. Submit anyway?`
+      )) {
+        // A native dialog can pause callbacks; recheck the real deadline.
+        updateTimer();
+        return;
+      }
+      finishTest();
+    });
+
+    $("retake").addEventListener("click", () => {
+      clearInterval(intervalId);
+      intervalId = null;
+      state = initialState();
+      $("timer").textContent = "15:00";
+      $("timer").classList.remove("urgent");
+      showScreen("welcome");
+      $("start").focus();
+      announce("Test reset. Start when you are ready.");
+    });
+
+    // Catch up immediately when returning from another tab or a suspended page.
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) updateTimer();
+    });
+    window.addEventListener("pageshow", updateTimer);
+  </script>
+</body>
+</html>
